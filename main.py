@@ -35,3 +35,32 @@ for col in numeric_columns:
     plt.legend()
     plt.grid(True)
     plt.show()
+
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, expr
+
+# Create a Spark session
+spark = SparkSession.builder.appName("ImputationExample").getOrCreate()
+
+# Replace 'your_dataframe' with your actual DataFrame name
+# Replace 'your_numeric_column' with the actual column name you want to process
+
+# Calculate the percentile values
+percentile_995 = your_dataframe.approxQuantile("your_numeric_column", [0.995], 0.0)[0]
+
+# Impute negative values with -1 and values above 99.5 percentile with 99.5 percentile value * 1.1
+imputed_df = your_dataframe.withColumn(
+    "your_numeric_column",
+    expr(
+        "CASE WHEN your_numeric_column < 0 THEN -1 "
+        f"WHEN your_numeric_column > {percentile_995} THEN {percentile_995 * 1.1} "
+        "ELSE your_numeric_column END"
+    )
+)
+
+# Show the resulting DataFrame
+imputed_df.show()
+
+# Stop the Spark session
+spark.stop()
